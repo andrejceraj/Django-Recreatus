@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if events %}
+        <div class="list-group">
+            {% for event in events %}
+                {% include '_event.html' %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No events are available.</p>
+    {% endif %}
+{% endblock %}

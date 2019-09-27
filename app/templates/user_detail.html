@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{{ user.username }}</h2>
+    <p>Email: {{ user.email }}</p>
+    <p>About me: {{ user.profile.bio }}</p>
+    <p>Last online: {{ user.profile.last_online }}</p>
+
+    {% if request.user == user %}
+        <a href="{% url 'app:edit_profile' %}">Edit profile</a>
+    {% endif %}
+
+    <h5>Hosted events</h5>
+    {% if user.profile.hosted_events.count > 0 %}
+        <ul>
+            {% for event in user.profile.hosted_events.all %}
+                {% include '_event.html' %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No hosted events</p>
+    {% endif %}
+
+    <h5>Participated events</h5>
+    {% if user.profile.events_participating.count > 0 %}
+        <ul>
+            {% for event in user.profile.events_participating.all %}
+                {% include '_event.html' %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No events participated</p>
+    {% endif %}
+
+{% endblock %}

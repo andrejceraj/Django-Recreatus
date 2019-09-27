@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2 class="mb-2" >{{ event.title }}</h2>
+    <p>Starts at: {{ event.start_time }}</p>
+    <p>Ends at: {{ event.end_time }}</p>
+    <p>Hosted by: <a href="{% url 'app:user_detail' event.owner.user.id %}">{{ event.owner.user.username }}</a></p>
+    <p class="mb-2" >{{ event.description }}</p>
+
+    {% if request.user.profile not in event.participants.all %}
+        <a href="{% url 'app:participation' event.id %}?participation=true">Participate event</a>
+    {% else %}
+        <a href="{% url 'app:participation' event.id %}?participation=false">I will not participate event</a>
+    {% endif %}
+    <h5>Participants</h5>
+    {% if event.participants.count > 0 %}
+        <ul>
+            {% for profile in event.participants.all %}
+                <li><a href="{% url 'app:user_detail' profile.user.id %}">{{ profile.user.username }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No participants yet</p>
+    {% endif %}
+
+    <h3>Comments</h3>
+    {% if event.comments.count > 0 %}
+        <ul class="list-groups">
+            {% for comment in event.comments.all %}
+                    <li class="list-group-item">
+                        {{ comment.posted_on }}
+                        <a href="{% url 'app:user_detail' comment.owner.user.id %}">{{ comment.owner.user.username }}</a>
+                        said: {{ comment.content }}
+                    </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'app:comment' event.id %}">
+        {% csrf_token %}
+        {{ comment_form.as_p }}
+        <button type="submit">Comment</button>
+    </form>
+
+{% endblock %}
