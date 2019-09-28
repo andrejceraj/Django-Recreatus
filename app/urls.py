@@ -11,5 +11,7 @@ urlpatterns = [
     path('user/<int:pk>/', views.user_detail, name='user_detail'),
     path('user/edit/', views.edit_profile, name='edit_profile'),
     path('event/<int:pk>/participation/', views.participation, name='participation'),
-    path('event/<int:pk>/comment/', views.comment, name='comment')
+    path('event/<int:pk>/comment/', views.comment, name='comment'),
+    path('event/<int:pk>/rate', views.rate_event, name='rate_event'),
+    path('user/<int:pk>/follow/', views.follow_user, name='follow_user')
 ]

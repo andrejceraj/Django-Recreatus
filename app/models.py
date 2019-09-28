@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -9,6 +10,8 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(max_length=200, blank=True)
     last_online = models.DateTimeField(default=timezone.now)
+
+    following = models.ManyToManyField('Profile', related_name='followers', blank=True)
 
     def __str__(self):
         return self.user.username
@@ -49,3 +52,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.content
+
+
+class Evaluation(models.Model):
+    grade = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
+
+    grader = models.ForeignKey(Profile, on_delete=models.DO_NOTHING)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.grader.user.username + '->' + self.event.owner.user.username + '->' + self.grade
+
+

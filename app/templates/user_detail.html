@@ -2,12 +2,27 @@
 
 {% block content %}
     <h2>{{ user.username }}</h2>
+    <h4>User rating: {{ rating }}</h4>
     <p>Email: {{ user.email }}</p>
     <p>About me: {{ user.profile.bio }}</p>
     <p>Last online: {{ user.profile.last_online }}</p>
 
     {% if request.user == user %}
         <a href="{% url 'app:edit_profile' %}">Edit profile</a>
+    {% elif user.profile not in request.user.profile.following.all %}
+        <a href="{% url 'app:follow_user' user.id %}?follow=true" >Follow</a>
+    {% else %}
+        <a href="{% url 'app:follow_user' user.id %}?follow=false" >Unfollow</a>
+    {% endif %}
+    <h5>Users following</h5>
+    {% if user.profile.following.count > 0 %}
+        <ul>
+            {% for profile in user.profile.following.all %}
+                <li><a href="{% url 'app:user_detail' profile.user.id %}">{{ profile.user.username }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No following users</p>
     {% endif %}
 
     <h5>Hosted events</h5>

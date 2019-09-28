@@ -1,8 +1,9 @@
 from django import forms
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import EmailField, CharField, PasswordInput
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile, Event, Comment
+from .models import Profile, Event, Comment, Evaluation
 
 
 class UserCreationForm(UserCreationForm):
@@ -42,3 +43,11 @@ class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ('content', )
+
+
+class RateForm(forms.ModelForm):
+    grade = forms.IntegerField(label="Rate event", required=True, validators=[MinValueValidator(1), MaxValueValidator(10)])
+
+    class Meta:
+        model = Evaluation
+        fields = ('grade', )

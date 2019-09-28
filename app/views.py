@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from .forms import ProfileForm, UserForm, CreateEventForm, UserCreationForm, CommentForm
-from .models import Event, Comment
+from .forms import ProfileForm, UserForm, CreateEventForm, UserCreationForm, CommentForm, RateForm
+from .models import Event, Comment, Evaluation
 
 
 @login_required
@@ -21,10 +21,12 @@ def event_detail(request, pk):
     event = Event.objects.get(pk=pk)
 
     comment_form = CommentForm()
+    rate_form = RateForm()
 
     context = {
         "event": event,
-        "comment_form": comment_form
+        "comment_form": comment_form,
+        "rate_form": rate_form
     }
     return render(request, 'event_detail.html', context)
 
@@ -32,7 +34,19 @@ def event_detail(request, pk):
 @login_required
 def user_detail(request, pk):
     user = User.objects.get(pk=pk)
+    evaluations = Evaluation.objects.filter(event__owner=user.profile)
+    count = 0
+    rating = 0
+    for e in evaluations:
+        rating += e.grade
+        count += 1
+
+    if count > 0:
+        rating = rating / count
+    else:
+        rating = "No rating to display"
     context = {
+        "rating": rating,
         "user": user
     }
     return render(request, 'user_detail.html', context)
@@ -96,18 +110,6 @@ def signup(request):
     return render(request, 'registration/signup.html', context)
 
 
-@login_required
-def participation(request, pk):
-    event = Event.objects.get(pk=pk)
-    participation = request.GET.get('participation', '')
-    if participation == 'true':
-        event.participants.add(request.user.profile)
-    elif participation == 'false':
-        event.participants.remove(request.user.profile)
-    else:
-        return redirect('app:index')
-    return redirect('app:event_detail', event.id)
-
 
 @login_required
 def comment(request, pk):
@@ -120,3 +122,47 @@ def comment(request, pk):
             Comment.objects.create(content=content, owner=owner, event=event)
 
     return redirect('app:event_detail', event.id)
+
+
+@login_required
+def rate_event(request, pk):
+    event = Event.objects.get(pk=pk)
+    if request.method == 'POST':
+        rate_form = RateForm(request.POST)
+        if rate_form.is_valid():
+            grade = rate_form.cleaned_data['grade']
+            grader = request.user.profile
+            Evaluation.objects.create(grade=grade, grader=grader, event=event)
+
+    return redirect('app:event_detail', event.id)
+
+
+
+@login_required
+def participation(request, pk):
+    event = Event.objects.get(pk=pk)
+    participation = request.GET.get('participation', '')
+    if participation == 'true':
+        if request.user.profile not in event.participants.all():
+            event.participants.add(request.user.profile)
+    elif participation == 'false':
+        if request.user.profile in event.participants.all():
+            event.participants.remove(request.user.profile)
+    else:
+        return redirect('app:index')
+    return redirect('app:event_detail', event.id)
+
+
+@login_required
+def follow_user(request, pk):
+    user = User.objects.get(pk=pk)
+    following = request.GET.get('follow', '')
+    if following == 'true':
+        if user.profile not in request.user.profile.following.all():
+            request.user.profile.following.add(user.profile)
+    elif following == 'false':
+        if user.profile in request.user.profile.following.all():
+            request.user.profile.following.remove(user.profile)
+    else:
+        redirect('app:index')
+    return redirect('app:user_detail', user.id)

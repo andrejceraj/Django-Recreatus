@@ -7,6 +7,12 @@
     <p>Hosted by: <a href="{% url 'app:user_detail' event.owner.user.id %}">{{ event.owner.user.username }}</a></p>
     <p class="mb-2" >{{ event.description }}</p>
 
+    <form method="post" action="{% url 'app:rate_event' event.id %}">
+        {% csrf_token %}
+        {{ rate_form.as_p }}
+        <button type="submit">Rate</button>
+    </form>
+
     {% if request.user.profile not in event.participants.all %}
         <a href="{% url 'app:participation' event.id %}?participation=true">Participate event</a>
     {% else %}
