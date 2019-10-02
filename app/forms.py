@@ -1,8 +1,11 @@
 from django import forms
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.forms import EmailField, CharField, PasswordInput
+from django.forms import EmailField, DateTimeField
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.utils import timezone
+from datetime import datetime
+
 from .models import Profile, Event, Comment, Evaluation
 
 
@@ -34,6 +37,9 @@ class ProfileForm(forms.ModelForm):
 
 
 class CreateEventForm(forms.ModelForm):
+    start_time = DateTimeField(label="Start time", help_text="e.g. 2018-9-21 15:30")
+    end_time = DateTimeField(label="End time", help_text="e.g. 2018-9-21 17:00")
+
     class Meta:
         model = Event
         fields = ('title', 'description', 'start_time', 'end_time', 'public_flag')

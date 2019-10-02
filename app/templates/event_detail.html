@@ -5,6 +5,13 @@
     <p>Starts at: {{ event.start_time }}</p>
     <p>Ends at: {{ event.end_time }}</p>
     <p>Hosted by: <a href="{% url 'app:user_detail' event.owner.user.id %}">{{ event.owner.user.username }}</a></p>
+
+    {% if event.public_flag %}
+        <p>Public event</p>
+    {% else %}
+        <p>Private event</p>
+    {% endif %}
+
     <p class="mb-2" >{{ event.description }}</p>
 
     <form method="post" action="{% url 'app:rate_event' event.id %}">
