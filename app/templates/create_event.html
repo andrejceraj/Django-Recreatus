@@ -3,7 +3,7 @@
 {% block content %}
     <form method="post">
         {% csrf_token %}
-        {{ create_event_fomr.as_p }}
+        {{ create_event_form.as_p }}
         <button type="submit" >Create event</button>
     </form>
 {% endblock %}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 
@@ -98,13 +99,15 @@ def create_event(request):
             owner = request.user.profile
             new_event = Event.objects.create(title=title, description=description, start_time=start_time,
                                              end_time=end_time, public_flag=public_flag, owner=owner)
+            messages.success(request, 'Event created successfully')
             return redirect('app:event_detail', new_event.id)
         else:
+            messages.error(request, 'Failed to create event')
             return redirect('app:create_event')
     else:
         create_event_form = CreateEventForm()
         context = {
-            "create_event_fomr": create_event_form
+            "create_event_form": create_event_form
         }
     return render(request, 'create_event.html', context)
 
@@ -116,9 +119,10 @@ def edit_profile(request):
         user_form = UserForm(request.POST, instance=request.user)
         profile_form = ProfileForm(request.POST, instance=request.user.profile)
         if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
+            user = user_form.save()
             profile_form.save()
-            return redirect('app:index')
+            messages.success(request, 'Profile edited successfully.')
+            return redirect('app:user_detail', user.id)
     else:
         user_form = UserForm(instance=request.user)
         profile_form = ProfileForm(instance=request.user.profile)
@@ -135,7 +139,9 @@ def signup(request):
         if user_form.is_valid():
             user = user_form.save()
             login(request, user)
+            messages.success(request, 'You have successfully signed up')
             return redirect('app:index')
+        messages.error(request, 'Failed to sign up.')
     else:
         user_form = UserCreationForm()
         context = {
@@ -153,6 +159,7 @@ def comment(request, pk):
             content = comment_form.cleaned_data['content']
             owner = request.user.profile
             Comment.objects.create(content=content, owner=owner, event=event)
+            messages.success(request, 'Comment posted')
 
     return redirect('app:event_detail', event.id)
 
@@ -176,6 +183,9 @@ def rate_event(request, pk):
             grade = rate_form.cleaned_data['grade']
             grader = request.user.profile
             Evaluation.objects.create(grade=grade, grader=grader, event=event)
+            messages.success(request, 'You have successfully rated the event')
+        else:
+            messages.error(request, 'Failed to rate event')
 
     return redirect('app:event_detail', event.id)
 
@@ -194,9 +204,11 @@ def participation(request, pk):
     if participation == 'true':
         if request.user.profile not in event.participants.all():
             event.participants.add(request.user.profile)
+            messages.success(request, 'You are now participating this event')
     elif participation == 'false':
         if request.user.profile in event.participants.all():
             event.participants.remove(request.user.profile)
+            messages.info(request, 'You no longer participate this event')
     else:
         return redirect('app:index')
     return redirect('app:event_detail', event.id)
@@ -209,9 +221,11 @@ def follow_user(request, pk):
     if following == 'true':
         if user.profile not in request.user.profile.following.all():
             request.user.profile.following.add(user.profile)
+            messages.success(request, 'User followed')
     elif following == 'false':
         if user.profile in request.user.profile.following.all():
             request.user.profile.following.remove(user.profile)
+            messages.success(request, 'You no longer follow this user')
     else:
         return redirect('app:index')
     return redirect('app:user_detail', user.id)
@@ -228,5 +242,5 @@ def invite_users(request, event_id):
 
             if user.profile not in event.invited_users.all():
                 event.invited_users.add(user.profile)
-
+        messages.success(request, 'Users invited')
         return redirect('app:event_detail', event_id)
