@@ -37,13 +37,29 @@ def event_detail(request, pk):
             event not in request.user.profile.hosted_events.all():
         return redirect('app:index')
 
+    users_to_invite = request.user.profile.following
+    for u in event.invited_users.all():
+        users_to_invite.remove(u)
+
     comment_form = CommentForm()
     rate_form = RateForm()
+    should_rate = True
+    if timezone.now() < event.end_time or event.owner == request.user.profile or request.user.profile not in event.participants.all():
+        should_rate = False
+
+    evaluated = Evaluation.objects.filter(grader=request.user.profile).filter(event=event).first()
+    if evaluated:
+        should_rate = False
+
+    event_ended = timezone.now() > event.end_time
 
     context = {
         "event": event,
         "comment_form": comment_form,
-        "rate_form": rate_form
+        "should_rate": should_rate,
+        "rate_form": rate_form,
+        "users_to_invite": users_to_invite,
+        "event_ended": event_ended
     }
     return render(request, 'event_detail.html', context)
 
@@ -202,24 +218,15 @@ def follow_user(request, pk):
 
 
 @login_required
-def invite_user(request, event_id):
-    username = request.GET.get('user')
-    user = User.objects.filter(username=username).first()
+def invite_users(request, event_id):
+    if request.method == 'POST':
+        event = Event.objects.get(pk=event_id)
+        invited_users_ids = request.POST.getlist('invited_users')
+        print(invited_users_ids)
+        for user_id in invited_users_ids:
+            user = User.objects.get(pk=user_id)
 
-    if not user:
-        return redirect('app:index')
+            if user.profile not in event.invited_users.all():
+                event.invited_users.add(user.profile)
 
-    if user == request.user:
-        return redirect('app:index')
-
-    event = Event.objects.get(pk=event_id)
-    invitation = request.GET.get('invitation', '')
-    if invitation == 'true':
-        if user.profile not in event.invited_users.all():
-            event.invited_users.add(user.profile)
-    elif invitation == 'false':
-        if user.profile in event.invited_users.all():
-            event.invited_users.remove(user.profile)
-    else:
-        return redirect('app:index')
-    return redirect('app:event_detail', event_id)
+        return redirect('app:event_detail', event_id)

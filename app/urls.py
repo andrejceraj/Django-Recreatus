@@ -15,5 +15,5 @@ urlpatterns = [
     path('event/<int:pk>/comment/', views.comment, name='comment'),
     path('event/<int:pk>/rate', views.rate_event, name='rate_event'),
     path('user/<int:pk>/follow/', views.follow_user, name='follow_user'),
-    path('event/<int:event_id>/invite_user/', views.invite_user, name='invite_user')
+    path('event/<int:event_id>/invite_users/', views.invite_users, name='invite_users')
 ]

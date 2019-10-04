@@ -14,26 +14,43 @@
 
     <p class="mb-2" >{{ event.description }}</p>
 
-    <form method="post" action="{% url 'app:rate_event' event.id %}">
-        {% csrf_token %}
-        {{ rate_form.as_p }}
-        <button type="submit">Rate</button>
-    </form>
-
-    {% if request.user.profile not in event.participants.all %}
-        <a href="{% url 'app:participation' event.id %}?participation=true">Participate event</a>
-    {% else %}
-        <a href="{% url 'app:participation' event.id %}?participation=false">I will not participate event</a>
+    {% if should_rate %}
+        <form method="post" action="{% url 'app:rate_event' event.id %}">
+            {% csrf_token %}
+            {{ rate_form.as_p }}
+            <button type="submit">Rate</button>
+        </form>
     {% endif %}
-    <h5>Participants</h5>
-    {% if event.participants.count > 0 %}
-        <ul>
-            {% for profile in event.participants.all %}
-                <li><a href="{% url 'app:user_detail' profile.user.id %}">{{ profile.user.username }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No participants yet</p>
+
+    {% if not event_ended %}
+        {% if event.owner == request.user.profile %}
+            Invite users:
+            <form method="post" action="{% url 'app:invite_users' event.id %}">
+            {% csrf_token %}
+                <select name="invited_users" multiple>
+                    {% for user_to_invite in users_to_invite.all %}
+                        <option value="{{ user_to_invite.user.id }}">{{ user_to_invite.user.username }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Invite</button>
+            </form>
+        {% endif %}
+
+        {% if request.user.profile not in event.participants.all %}
+            <a href="{% url 'app:participation' event.id %}?participation=true">Participate event</a>
+        {% else %}
+            <a href="{% url 'app:participation' event.id %}?participation=false">I will not participate event</a>
+        {% endif %}
+        <h5>Participants</h5>
+        {% if event.participants.count > 0 %}
+            <ul>
+                {% for profile in event.participants.all %}
+                    <li><a href="{% url 'app:user_detail' profile.user.id %}">{{ profile.user.username }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No participants yet</p>
+        {% endif %}
     {% endif %}
 
     <h3>Comments</h3>

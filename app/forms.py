@@ -52,7 +52,7 @@ class CommentForm(forms.ModelForm):
 
 
 class RateForm(forms.ModelForm):
-    grade = forms.IntegerField(label="Rate event", required=True, validators=[MinValueValidator(1), MaxValueValidator(10)])
+    grade = forms.IntegerField(label="Rate event",help_text='/10', required=True, validators=[MinValueValidator(1), MaxValueValidator(10)])
 
     class Meta:
         model = Evaluation
