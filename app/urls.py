@@ -17,3 +17,4 @@ urlpatterns = [
     path('user/<int:pk>/follow/', views.follow_user, name='follow_user'),
     path('event/<int:event_id>/invite_users/', views.invite_users, name='invite_users')
 ]
+

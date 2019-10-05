@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
+from django.http import Http404
 
 from .forms import ProfileForm, UserForm, CreateEventForm, UserCreationForm, CommentForm, RateForm
 from .models import Event, Comment, Evaluation
@@ -33,6 +34,8 @@ def private_events(request):
 @login_required
 def event_detail(request, pk):
     event = Event.objects.get(pk=pk)
+    if not event:
+        raise Http404("Event not found!")
 
     if event.public_flag is False and event not in request.user.profile.events_invited_to.all() and \
             event not in request.user.profile.hosted_events.all():
@@ -68,6 +71,9 @@ def event_detail(request, pk):
 @login_required
 def user_detail(request, pk):
     user = User.objects.get(pk=pk)
+    if not user:
+        raise Http404("User not found!")
+
     evaluations = Evaluation.objects.filter(event__owner=user.profile)
     count = 0
     rating = 0
@@ -123,13 +129,15 @@ def edit_profile(request):
             profile_form.save()
             messages.success(request, 'Profile edited successfully.')
             return redirect('app:user_detail', user.id)
-    else:
-        user_form = UserForm(instance=request.user)
-        profile_form = ProfileForm(instance=request.user.profile)
-        context = {
-            "user_form": user_form,
-            "profile_form": profile_form
-        }
+        else:
+            messages.error('Inserted data is invalid')
+
+    user_form = UserForm(instance=request.user)
+    profile_form = ProfileForm(instance=request.user.profile)
+    context = {
+        "user_form": user_form,
+        "profile_form": profile_form
+    }
     return render(request, 'edit_profile.html', context)
 
 
@@ -153,6 +161,9 @@ def signup(request):
 @login_required
 def comment(request, pk):
     event = Event.objects.get(pk=pk)
+    if not event:
+        raise Http404("Event not found!")
+
     if request.method == 'POST':
         comment_form = CommentForm(request.POST)
         if comment_form.is_valid():
@@ -160,6 +171,8 @@ def comment(request, pk):
             owner = request.user.profile
             Comment.objects.create(content=content, owner=owner, event=event)
             messages.success(request, 'Comment posted')
+        else:
+            messages.error(request, "Failed to post comment.")
 
     return redirect('app:event_detail', event.id)
 
@@ -167,6 +180,8 @@ def comment(request, pk):
 @login_required
 def rate_event(request, pk):
     event = Event.objects.get(pk=pk)
+    if not event:
+        raise Http404("Event not found!")
 
     if request.user.profile not in event.participants.all():
         return redirect('app:index')
@@ -193,6 +208,8 @@ def rate_event(request, pk):
 @login_required
 def participation(request, pk):
     event = Event.objects.get(pk=pk)
+    if not event:
+        raise Http404("Event not found!")
 
     if event.end_time < timezone.now():
         return redirect('app:index')
@@ -217,6 +234,9 @@ def participation(request, pk):
 @login_required
 def follow_user(request, pk):
     user = User.objects.get(pk=pk)
+    if not user:
+        raise Http404("User not found!")
+
     following = request.GET.get('follow', '')
     if following == 'true':
         if user.profile not in request.user.profile.following.all():
@@ -233,14 +253,15 @@ def follow_user(request, pk):
 
 @login_required
 def invite_users(request, event_id):
+    event = Event.objects.get(pk=event_id)
+    if not event:
+        raise Http404("Event not found!")
+
     if request.method == 'POST':
-        event = Event.objects.get(pk=event_id)
         invited_users_ids = request.POST.getlist('invited_users')
-        print(invited_users_ids)
         for user_id in invited_users_ids:
             user = User.objects.get(pk=user_id)
-
-            if user.profile not in event.invited_users.all():
+            if user and user.profile not in event.invited_users.all():
                 event.invited_users.add(user.profile)
         messages.success(request, 'Users invited')
-        return redirect('app:event_detail', event_id)
+    return redirect('app:event_detail', event_id)

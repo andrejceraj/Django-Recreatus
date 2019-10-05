@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <br>
+    <br>
+    <h1>We apologize, internal server error occurred.</h1>
+    {% if exception %}
+        <h5>{{ exception }}</h5>
+    {% endif %}
+{% endblock %}

@@ -20,3 +20,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('app.urls'), name='app')
 ]
+
+handler404 = 'app.errors.not_found'
+handler400 = 'app.errors.bad_request'
+handler500 = 'app.errors.server_error'
