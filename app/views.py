@@ -12,7 +12,7 @@ from django.db.models import Q
 from .forms import ProfileForm, UserForm, CreateEventForm, UserCreationForm, CommentForm, RateForm
 from .models import Event, Comment, Evaluation
 
-EVENTS_PER_PAGE = 3
+EVENTS_PER_PAGE = 2
 
 @login_required
 def index(request):
@@ -279,27 +279,29 @@ def search(request):
     query = request.GET.get('query', '')
     type = request.GET.get('type', '')
     page = request.GET.get('page', default='1')
-    print(query)
-    print(type)
     if query == '' or type == '':
         return redirect('app:index')
 
     if type == 'events':
-        print("events")
         events = Event.objects.filter(public_flag=True).filter(Q(title__icontains=query) | Q(description__icontains=query)).order_by('-start_time')
         paginator = Paginator(events, EVENTS_PER_PAGE)
+        url_params = "query=" + query.replace(' ', "+", -1)
+        url_params += "&type=events"
         context = {
             "page": paginator.page(page),
-            "type": "events"
+            "type": "events",
+            "url_params": url_params
         }
         return render(request, 'search.html', context)
     elif type == 'users':
-        print("users")
         users = User.objects.filter(Q(username__icontains=query))
         paginator = Paginator(users, EVENTS_PER_PAGE)
+        url_params = "query=" + query.replace(' ', "+", -1)
+        url_params += "&type=users"
         context = {
             "page": paginator.page(page),
-            "type": "users"
+            "type": "users",
+            "url_params": url_params
         }
         return render(request, 'search.html', context)
     else:
