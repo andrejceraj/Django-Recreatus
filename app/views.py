@@ -14,6 +14,7 @@ from .models import Event, Comment, Evaluation
 
 EVENTS_PER_PAGE = 2
 
+
 @login_required
 def index(request):
     page = request.GET.get('page', default='1')

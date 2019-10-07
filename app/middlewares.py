@@ -1,5 +1,6 @@
 from django.utils import timezone
 from .models import Profile
+import pytz
 
 
 class UpdateLastActivityMiddleware:
@@ -19,3 +20,16 @@ class UpdateLastActivityMiddleware:
         # the view is called.
 
         return response
+
+
+class TimezoneMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        tzname = 'Europe/Zagreb'
+        if tzname:
+            timezone.activate(pytz.timezone(tzname))
+        else:
+            timezone.deactivate()
+        return self.get_response(request)

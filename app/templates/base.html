@@ -10,7 +10,8 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </head>
 <body>
-
+    {% load tz %}
+    {% localtime on %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -19,11 +20,7 @@
         <a class="navbar-brand" href="{% url 'app:index' %}">Recreatus</a>
         <a class="nav-link" href="{% url 'app:index' %}">Home<span class="sr-only">(current)</span></a>
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-            <!--
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-          </li>
-            -->
+
             {% if user.is_authenticated %}
                 <form class="form-inline my-2 my-lg-0" method="get" action="{% url 'app:search' %}">
                   <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query">
@@ -65,5 +62,6 @@
         {% endblock %}
     </div>
 
+    {% endlocaltime %}
 </body>
 </html>

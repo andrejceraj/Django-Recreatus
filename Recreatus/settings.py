@@ -48,7 +48,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'app.middlewares.UpdateLastActivityMiddleware'
+    'app.middlewares.UpdateLastActivityMiddleware',
+    'app.middlewares.TimezoneMiddleware'
 ]
 
 ROOT_URLCONF = 'Recreatus.urls'
