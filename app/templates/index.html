@@ -1,12 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% if events %}
+    {% if events_page.object_list %}
         <div class="list-group">
-            {% for event in events %}
+            {% for event in events_page.object_list %}
                 {% include '_event.html' %}
             {% endfor %}
         </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-around">
+                <li class="page-item {% if not events_page.has_previous %} disabled{% endif %}">
+                    <a class="page-link" href="{% url 'app:index' %}{% if events_page.has_previous %}?page={{ events_page.previous_page_number }}{% endif %}">Newer events</a>
+                </li>
+                <li class="page-item {% if not events_page.has_next %} disabled{% endif %}">
+                    <a class="page-link" href="{% url 'app:index' %}{% if events_page.has_next %}?page={{ events_page.next_page_number }}{% endif %}">Older events</a>
+                </li>
+            </ul>
+        </nav>
     {% else %}
         <p>No events are available.</p>
     {% endif %}

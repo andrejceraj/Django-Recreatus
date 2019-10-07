@@ -6,27 +6,33 @@ from django.contrib import messages
 from django.db import transaction
 from django.utils import timezone
 from django.http import Http404
+from django.core.paginator import Paginator
 
 from .forms import ProfileForm, UserForm, CreateEventForm, UserCreationForm, CommentForm, RateForm
 from .models import Event, Comment, Evaluation
 
+EVENTS_PER_PAGE = 3
 
 @login_required
 def index(request):
+    page = request.GET.get('page', default='1')
     events = Event.objects.filter(public_flag=True).order_by('-start_time')
+    paginator = Paginator(events, EVENTS_PER_PAGE)
     context = {
-        "events": events
+        "events_page": paginator.page(page)
     }
     return render(request, 'index.html', context)
 
 
 @login_required
 def private_events(request):
+    page = request.GET.get('page', default='1')
     events = list(request.user.profile.events_invited_to.filter(public_flag=False))
     events.extend(list(request.user.profile.hosted_events.filter(public_flag=False)))
     events.sort(key=lambda event: event.start_time, reverse=True)
+    paginator = Paginator(events, EVENTS_PER_PAGE)
     context = {
-        "events": events
+        "events_page": paginator.page(page)
     }
     return render(request, 'index.html', context)
 
