@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.http import Http404
 from django.core.paginator import Paginator
+from django.db.models import Q
 
 from .forms import ProfileForm, UserForm, CreateEventForm, UserCreationForm, CommentForm, RateForm
 from .models import Event, Comment, Evaluation
@@ -271,3 +272,37 @@ def invite_users(request, event_id):
                 event.invited_users.add(user.profile)
         messages.success(request, 'Users invited')
     return redirect('app:event_detail', event_id)
+
+
+@login_required
+def search(request):
+    query = request.GET.get('query', '')
+    type = request.GET.get('type', '')
+    page = request.GET.get('page', default='1')
+    print(query)
+    print(type)
+    if query == '' or type == '':
+        return redirect('app:index')
+
+    if type == 'events':
+        print("events")
+        events = Event.objects.filter(public_flag=True).filter(Q(title__icontains=query) | Q(description__icontains=query)).order_by('-start_time')
+        paginator = Paginator(events, EVENTS_PER_PAGE)
+        context = {
+            "page": paginator.page(page),
+            "type": "events"
+        }
+        return render(request, 'search.html', context)
+    elif type == 'users':
+        print("users")
+        users = User.objects.filter(Q(username__icontains=query))
+        paginator = Paginator(users, EVENTS_PER_PAGE)
+        context = {
+            "page": paginator.page(page),
+            "type": "users"
+        }
+        return render(request, 'search.html', context)
+    else:
+        print("nista")
+        return redirect('app:index')
+

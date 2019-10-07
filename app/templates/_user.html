@@ -1,0 +1,11 @@
+<a href="{% url 'app:user_detail' user.id %}" class="list-group-item list-group-item-action mb-2">
+    <div class="d-flex w-100 justify-content-between">
+        <h4 class="mb-1">{{ user.username }}</h4>
+        <small class="text-muted">Last seen: {{ user.profile.last_online }}</small>
+    </div>
+    <div>
+        <p>Events hosted: {{ user.profile.hosted_events.count }}</p>
+        <p>Events participated: {{ user.profile.events_participating.count }}</p>
+        <p class="mb-1">About me: {{ user.profile.bio }}</p>
+    </div>
+</a>

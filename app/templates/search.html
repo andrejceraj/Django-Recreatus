@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if page.object_list %}
+        <div class="list-group">
+            {% if type == 'users' %}
+                {% for user in page.object_list %}
+                    {% include '_user.html' %}
+                {% endfor %}
+            {% elif type == 'events' %}
+                {% for event in page.object_list %}
+                    {% include '_event.html' %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-around">
+                <li class="page-item {% if not page.has_previous %} disabled{% endif %}">
+                    <a class="page-link" href="{% url 'app:search' %}{% if page.has_previous %}
+                    ?page={{ page.previous_page_number }}&{{ url_params }}{% endif %}">Newer events</a>
+                </li>
+                <li class="page-item {% if not page.has_next %} disabled{% endif %}">
+                    <a class="page-link" href="{% url 'app:search' %}{% if page.has_next %}
+                    ?page={{ page.next_page_number }}&{{ url_params }}{% endif %}">Older events</a>
+                </li>
+            </ul>
+        </nav>
+    {% else %}
+        <p>No events are available.</p>
+    {% endif %}
+{% endblock %}

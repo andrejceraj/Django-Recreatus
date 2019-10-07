@@ -25,10 +25,10 @@
           </li>
             -->
             {% if user.is_authenticated %}
-                <form class="form-inline my-2 my-lg-0">
-                  <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <form class="form-inline my-2 my-lg-0" method="get" action="{% url 'app:search' %}">
+                  <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="query">
                   <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-                  <select class="custom-select mr-sm-1" id="inlineFormCustomSelect">
+                  <select class="custom-select mr-sm-1" id="inlineFormCustomSelect" name="type">
                     <option selected value="events">Events</option>
                     <option value="users">Users</option>
                   </select>
